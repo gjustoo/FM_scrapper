@@ -6,8 +6,10 @@ class Cars:
     miata = 'mx5'
 class urls:
 
-    mp_base = 'https://www.facebook.com/marketplace/{}/search/?query={}'
+    mp_base = 'https://www.facebook.com/marketplace/london/search/?{}'
 
+class banned:
+    words = ['mercedes','bmw','350z','Smart','Smart','Benz','Mercedes']
 
 class xpath:
 

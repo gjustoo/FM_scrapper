@@ -9,7 +9,7 @@ import CarAD
 def send_telegram_message(message: str):
     config = configparser.RawConfigParser()
 
-    config.read('telegram.properties')
+    config.read('fm.properties')
 
     chat_id = config.get('TelegramCredentials', 'telegram.chatId')
     api_key = config.get('TelegramCredentials', 'telegram.api.token')
