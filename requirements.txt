@@ -1,4 +1,4 @@
-selenium-webdriver
+selenium
 webdriver-manager
 chromedriver-binary-auto
 configparser
