@@ -1,39 +1,61 @@
-from selenium import webdriver
 import chromedriver_binary
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 
+import Constants
+from CarAD import CarAD
+from HistoryCheck import check_uid, save_uid
 
-mp_base = 'https://www.facebook.com/marketplace/london/search/?query=mx5'
-
-
-driver = webdriver.Chrome()
-driver.get(mp_base)
-driver.set_window_position(0, 0)
-driver.set_window_size(1920, 900)
-
-accept_cookie_path = '/html/body/div[2]/div[1]/div/div[2]/div/div/div/div[2]/div/div[2]'
+global driver
 
 
-accept_cookie__button = driver.find_element(By.XPATH, accept_cookie_path)
+def set_up():
+    global driver
+    options = Options()
+    options.add_argument('--headless')
+    options.add_argument('--disable-gpu')
+    driver = webdriver.Chrome(chrome_options=options)
+    driver.get(Constants.urls.mp_base.format(
+        Constants.Cities.london, Constants.Cars.mr2))
+    driver.set_window_position(0, 0)
+    driver.set_window_size(1920, 900)
 
-accept_cookie__button.click()
 
-ad_container_path = '/html/body/div[1]/div/div[1]/div/div[3]/div/div/div/div[1]/div[1]/div[2]/div/div/div[3]/*'
+def accept_cookies():
+    global driver
+    accept_cookie__button = driver.find_element(
+        By.XPATH, Constants.xpath.accept_cookie_path)
+    accept_cookie__button.click()
+    driver.implicitly_wait(5)
 
 
-driver.implicitly_wait(5)
-ads_containers = driver.find_elements(By.XPATH, ad_container_path)
-# parent_element = element.find_element(By.XPATH, "..")
-i =0
-for ads in ads_containers:
-    ads_infos = ads.text.split('£')
-    for ad in ads_infos:
-        # print(ad)
-        print("=======================================================================")
-        ad_info = ad.splitlines()
-        if len(ad_info) > 0:
-            i+=1
-            print(i)
-            print(ad_info)
-        
-a =0
+def process_ads():
+
+    ads_containers = driver.find_elements(
+        By.XPATH, Constants.xpath.ad_container_path)
+    new_saved = 0
+    for ads in ads_containers:
+        cards = ads.find_elements(
+            By.XPATH, Constants.xpath.cards_xpath)
+        for card in cards:
+            try:
+                if card.text == '':
+                    continue
+                link = card.find_element(By.XPATH, Constants.xpath.card_link)
+                url = link.get_attribute("href")
+                split_desc = card.text.splitlines()
+                card_ad = CarAD(split_desc, url)
+
+                if not check_uid(card_ad.uid):
+                    save_uid(card_ad.uid)
+                    new_saved += 1
+
+            except:
+                print('Could not get card : \n' + str(card))
+    print('Saved {} new ads'.format(new_saved))
+
+
+set_up()
+accept_cookies()
+process_ads()
