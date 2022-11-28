@@ -9,6 +9,7 @@ from CarAD import CarAD
 from HistoryCheck import check_uid, save_uid
 from FMQuery import FMQuery
 import csv
+import os
 from Constants import banned
 global driver
 global telegram_notification
@@ -41,9 +42,10 @@ def set_up(query: FMQuery):
     global driver
 
     options = webdriver.ChromeOptions()
+    options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
     options.add_argument('--headless')
     options.add_argument('--disable-gpu')
-    driver = webdriver.Chrome(options=options)
+    driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"),options=options)
     get_properties()
     driver.get(query.get_url())
     driver.set_window_position(0, 0)
