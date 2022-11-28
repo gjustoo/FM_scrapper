@@ -49,8 +49,6 @@ def set_up(query: FMQuery):
     driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"),options=options)
     get_properties()
     driver.get(query.get_url())
-    driver.set_window_position(0, 0)
-    driver.set_window_size(1920, 900)
 
 
 def accept_cookies():
