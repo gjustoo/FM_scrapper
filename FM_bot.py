@@ -2,7 +2,7 @@ import chromedriver_binary
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
-
+from Telegram_notifier import send_telegram_message
 import Constants
 from CarAD import CarAD
 from HistoryCheck import check_uid, save_uid
@@ -49,6 +49,7 @@ def process_ads():
 
                 if not check_uid(card_ad.uid):
                     save_uid(card_ad.uid)
+                    send_telegram_message(card_ad.to_string())
                     new_saved += 1
 
             except:

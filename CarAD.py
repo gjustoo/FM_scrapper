@@ -24,3 +24,9 @@ class CarAD:
         end_index = url.index('/?hoi')
 
         self.uid = url[start_index:end_index]
+
+    def to_string(self):
+        result = '⚠️⚠️⚠️⚠️⚠️⚠️\n<b>! Nuevo anuncio publicado !</b>\n ⚠️⚠️⚠️⚠️⚠️⚠️\n\n\n' + self.title + '\n 📏<b>KMs</b> ' + \
+            self.km + '\n📍<b>Localizacion</b> : ' + self.location + \
+            '\n 💰<b>Precio</b> ' + self.price + '\n\n\n 🔗<b>Link</b> : ' + self.url
+        return result
