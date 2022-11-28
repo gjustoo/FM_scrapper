@@ -11,9 +11,9 @@ class FMQuery:
     def get_url(self):
         result = ''
         if self . max_price != None and self . min_price:
-            result = 'min_price='+str(self.min_price) + \
-                '&max_price'+str(self.max_price)
-        result = result + '&sortBy=creation_time_descend&exact=false'
+            result = 'minPrice='+str(self.min_price) + \
+                '&maxPrice='+str(self.max_price)
+        result = result + '&exact=false'
         if self . query != None:
             result = result + '&query='+self.query
 
