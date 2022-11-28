@@ -1,0 +1,4 @@
+selenium-webdriver
+webdriver-manager
+chromedriver-binary-auto
+configparser
