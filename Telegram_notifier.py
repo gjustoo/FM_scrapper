@@ -1,14 +1,12 @@
+import configparser
 import json
 
-import configparser
 import requests
-
-import CarAD
 
 
 def send_telegram_message(message: str):
     config = configparser.RawConfigParser()
-
+    requests.packages.urllib3.disable_warnings()
     config.read('fm.properties')
 
     chat_id = config.get('TelegramCredentials', 'telegram.chatId')
@@ -28,4 +26,6 @@ def send_telegram_message(message: str):
                              data=data,
                              headers=headers,
                              verify=False)
+    if response.status_code == 200:
+        print('Notification sent successfully')
     return response

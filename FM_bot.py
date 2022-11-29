@@ -2,11 +2,13 @@ import configparser
 import csv
 import os
 import sys
+import traceback
 
 import chromedriver_binary
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
 
 import Constants
 from CarAD import CarAD
@@ -32,7 +34,7 @@ def get_queries() -> list[FMQuery]:
 
 def get_page():
     global driver
-    
+
     with open('out.txt', 'w') as f:
         f.write(driver.page_source)
 
@@ -44,11 +46,11 @@ def get_properties():
 
     config.read('fm.properties')
 
-    telegram_notification = config.get('BotProperties', 'bot.maxResults')
-    max_queries = config.get('BotProperties', 'bot.notification')
+    max_queries = config.get('BotProperties', 'bot.maxResults')
+    telegram_notification = config.get('BotProperties', 'bot.notification')
 
 
-def set_up(query: FMQuery):
+def set_up():
     global driver
     options = webdriver.ChromeOptions()
     options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
@@ -59,11 +61,10 @@ def set_up(query: FMQuery):
 
     driver = webdriver.Chrome(options=options)
 
-    driver.implicitly_wait(5)
+    driver.implicitly_wait(10)
     get_properties()
-    driver.get(query.get_url())
-    get_page()
-    
+
+
 def set_up_local(query: FMQuery):
     global driver
 
@@ -72,17 +73,17 @@ def set_up_local(query: FMQuery):
     options.add_argument("--no-sandbox")
     options.add_argument('--disable-gpu')
     options.add_argument("--disable-notifications")
+    options.add_argument("window-size=1920,1080")
     driver = webdriver.Chrome(options=options)
     get_properties()
     driver.get(query.get_url())
     driver.set_window_position(0, 0)
     driver.set_window_size(1920, 900)
-    driver.implicitly_wait(5)
+    driver.implicitly_wait(10)
 
 
 def log_in(query: FMQuery):
     global driver
-    driver.implicitly_wait(5)
     driver.get(Constants.urls.log_in)
 
     username_input = driver.find_element(
@@ -97,9 +98,7 @@ def log_in(query: FMQuery):
     passwd_input.send_keys(passwd)
     passwd_input.submit()
 
-    driver.implicitly_wait(10)
     driver.get(query.get_url())
-    driver.execute_script('window.location.replace(\"'+query.get_url()+'\")')
 
 
 def accept_cookies():
@@ -112,8 +111,11 @@ def accept_cookies():
     driver.implicitly_wait(5)
 
 
-def process_ads():
+def process_ads(query: FMQuery):
     driver.implicitly_wait(10)
+    driver.get(query.get_url())
+    driver.implicitly_wait(10)
+
     ads_containers = driver.find_elements(
         By.XPATH, Constants.xpath.ad_container_path)
     results = 0
@@ -137,21 +139,28 @@ def process_ads():
                     save_uid(card_ad.uid)
                     send_telegram_message(card_ad.to_string())
                     results += 1
-                    if (results >= max_queries):
+                    if (results >= int(max_queries)):
                         break
 
             except:
-                print('Could not get card : \n' + str(card))
+                traceback.print_exc()
 
     print('Saved {} new ads'.format(results))
 
 
 queries = get_queries()
-
+set_up()
 for query in queries:
     print(
         f'\tSearch car model : {query.query} at maximum price of {query.max_price}.')
-    set_up(query)
-    accept_cookies()
-    log_in(query)
-    process_ads()
+    try:
+        log_in(query)
+    except:
+        print('Could not log in')
+    WebDriverWait(driver, 5)
+    try:
+        accept_cookies()
+    except:
+        print('Could not accept cookies')
+    WebDriverWait(driver, 3)
+    process_ads(query)

@@ -7,7 +7,7 @@ class Cars:
 class urls:
 
     mp_base = 'https://www.facebook.com/marketplace/london/search/?{}'
-    log_in = 'https://www.facebook.com/login/device-based/regular/login/?login_attempt=1'
+    log_in = 'https://www.facebook.com/login'
 
 class banned:
     words = ['mercedes','bmw','350z','Smart','Smart','Benz','Mercedes']
