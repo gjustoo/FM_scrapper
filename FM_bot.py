@@ -32,6 +32,7 @@ def get_queries() -> list[FMQuery]:
 
 def get_page():
     global driver
+    
     with open('out.txt', 'w') as f:
         f.write(driver.page_source)
 
