@@ -32,7 +32,9 @@ def get_queries() -> list[FMQuery]:
 
 def get_page():
     global driver
-    print(driver.page_source)
+    with open('out.txt', 'w') as f:
+        print(driver.page_source(),file=f)
+
 
 def get_properties():
     global telegram_notification
