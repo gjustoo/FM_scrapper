@@ -50,11 +50,27 @@ def set_up(query: FMQuery):
     options.add_argument('--disable-gpu')
     options.add_argument("--disable-notifications")
 
-    driver = webdriver.Chrome(executable_path=os.environ.get(
-        "CHROMEDRIVER_PATH"), options=options)
+    driver = webdriver.Chrome(options=options)
+
+    driver.implicitly_wait(5)
     get_properties()
     driver.get(query.get_url())
-    print(driver.page_source)
+
+
+def set_up_local(query: FMQuery):
+    global driver
+
+    options = webdriver.ChromeOptions()
+    options.add_argument('--headless')
+    options.add_argument("--no-sandbox")
+    options.add_argument('--disable-gpu')
+    options.add_argument("--disable-notifications")
+    driver = webdriver.Chrome(options=options)
+    get_properties()
+    driver.get(query.get_url())
+    driver.set_window_position(0, 0)
+    driver.set_window_size(1920, 900)
+    driver.implicitly_wait(5)
 
 
 def log_in(query: FMQuery):
@@ -77,24 +93,6 @@ def log_in(query: FMQuery):
     driver.implicitly_wait(10)
     driver.get(query.get_url())
     driver.execute_script('window.location.replace(\"'+query.get_url()+'\")')
-
-
-def set_up_local(query: FMQuery):
-    global driver
-
-    options = webdriver.ChromeOptions()
-    options.add_argument('--headless')
-    options.add_argument('--disable-gpu')
-    options.add_argument('--headless')
-    options.add_argument("--no-sandbox")
-    options.add_argument('--disable-gpu')
-    options.add_argument("--disable-notifications")
-    driver = webdriver.Chrome(options=options)
-    get_properties()
-    driver.get(query.get_url())
-    driver.set_window_position(0, 0)
-    driver.set_window_size(1920, 900)
-    driver.implicitly_wait(5)
 
 
 def accept_cookies():
