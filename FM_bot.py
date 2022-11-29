@@ -1,6 +1,7 @@
 import configparser
 import csv
 import os
+import sys
 
 import chromedriver_binary
 from selenium import webdriver
@@ -66,6 +67,11 @@ def log_in(query: FMQuery):
     passwd_input = driver.find_element(
         By.XPATH, Constants.xpath.password_input)
 
+    username = sys.argv[1]
+    passwd = sys.argv[2]
+
+    username_input.send_keys(username)
+    passwd_input.send_keys(passwd)
     passwd_input.submit()
 
     driver.implicitly_wait(10)
