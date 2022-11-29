@@ -30,6 +30,10 @@ def get_queries() -> list[FMQuery]:
         return result
 
 
+def get_page():
+    global driver
+    print(driver.page_source)
+
 def get_properties():
     global telegram_notification
     global max_queries
@@ -55,8 +59,8 @@ def set_up(query: FMQuery):
     driver.implicitly_wait(5)
     get_properties()
     driver.get(query.get_url())
-
-
+    get_page()
+    
 def set_up_local(query: FMQuery):
     global driver
 
@@ -98,6 +102,7 @@ def log_in(query: FMQuery):
 def accept_cookies():
     global driver
     driver.implicitly_wait(5)
+    get_page()
     accept_cookie__button = driver.find_element(
         By.XPATH, Constants.xpath.accept_cookie_path)
     accept_cookie__button.click()
