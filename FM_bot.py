@@ -145,7 +145,7 @@ queries = get_queries()
 for query in queries:
     print(
         f'\tSearch car model : {query.query} at maximum price of {query.max_price}.')
-    set_up_local(query)
+    set_up(query)
     accept_cookies()
     log_in(query)
     process_ads()
