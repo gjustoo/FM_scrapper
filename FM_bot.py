@@ -85,6 +85,7 @@ def set_up_local(query: FMQuery):
 def log_in(query: FMQuery):
     global driver
     driver.get(Constants.urls.log_in)
+    WebDriverWait(driver, 5)
 
     username_input = driver.find_element(
         By.XPATH, Constants.xpath.username_input)
