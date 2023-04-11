@@ -10,12 +10,11 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 
-import Constants
-from CarAD import CarAD
-from Constants import banned
-from FMQuery import FMQuery
 from HistoryCheck import check_uid, save_uid
-from Telegram_notifier import send_telegram_message
+from model.CarAD import CarAD
+import model.constants.Constants as Constants
+from model.FMQuery import FMQuery
+from notifier.Telegram_notifier import send_telegram_message
 
 global driver
 global telegram_notification
@@ -24,7 +23,7 @@ global max_queries
 
 def get_queries() -> list[FMQuery]:
     result = []
-    with open('searchQueries.csv') as csv_file:
+    with open('logic/searchQueries.csv') as csv_file:
         csv_reader = csv.reader(csv_file, delimiter=',')
         for row in csv_reader:
             result.append(FMQuery(row[0], row[1], row[2]))
@@ -44,7 +43,7 @@ def get_properties():
     global max_queries
     config = configparser.RawConfigParser()
 
-    config.read('fm.properties')
+    config.read('logic/fm.properties')
 
     max_queries = config.get('BotProperties', 'bot.maxResults')
     telegram_notification = config.get('BotProperties', 'bot.notification')
@@ -127,7 +126,7 @@ def process_ads(query: FMQuery):
             try:
                 if card.text == '':
                     continue
-                if any(banned in card.text for banned in banned.words):
+                if any(banned in card.text for banned in Constants.banned.words):
                     continue
                 link = card.find_element(By.XPATH, Constants.xpath.card_link)
                 url = link.get_attribute("href")

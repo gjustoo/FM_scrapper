@@ -21,9 +21,12 @@ class CarAD:
         url = self.url
 
         start_index = url.index('item/') + len('item/')
-        end_index = url.index('/?hoi')
 
-        self.uid = url[start_index:end_index]
+        try:
+            end_index = url.index('/?hoi')
+            self.uid = url[start_index:end_index]
+        except ValueError:
+            self.uid = url[start_index:]
 
     def to_string(self):
         result = '⚠️⚠️⚠️⚠️⚠️⚠️\n<b>! Nuevo anuncio publicado !</b>\n ⚠️⚠️⚠️⚠️⚠️⚠️\n\n\n' + self.title + '\n 📏<b>KMs</b> ' + \

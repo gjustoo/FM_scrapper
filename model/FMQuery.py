@@ -1,4 +1,4 @@
-from Constants import urls
+from model.constants.Constants import urls
 
 
 class FMQuery:
