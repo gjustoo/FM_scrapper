@@ -3,18 +3,22 @@ import csv
 import os
 import sys
 import traceback
+from io import BytesIO
 
 import chromedriver_binary
+import requests
+from HistoryCheck import check_uid, save_uid
+from PIL import Image
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 
-from HistoryCheck import check_uid, save_uid
-from model.CarAD import CarAD
 import model.constants.Constants as Constants
+from model.CarAD import CarAD
 from model.FMQuery import FMQuery
-from notifier.Telegram_notifier import send_telegram_message
+from notifier.Telegram_notifier import (send_telegram_image,
+                                        send_telegram_message)
 
 global driver
 global telegram_notification
@@ -135,9 +139,10 @@ def process_ads(query: FMQuery):
                 card_ad = CarAD(split_desc, url)
 
                 if not check_uid(card_ad.uid):
-
+                    
+                    take_screenshot(query.query, card_ad.uid, card)
                     save_uid(card_ad.uid)
-                    send_telegram_message(card_ad.to_string())
+                    send_telegram_image(card_ad.to_string(), screenshot_file)
                     results += 1
                     if (results >= int(max_queries)):
                         break
@@ -146,6 +151,21 @@ def process_ads(query: FMQuery):
                 traceback.print_exc()
 
     print('Saved {} new ads'.format(results))
+
+
+def take_screenshot(query, uid, card):
+    directory = f'img/{query}/'
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
+    screenshot_file = f"{directory}{uid}.png"
+
+    img_src = card.find_elements(
+        By.XPATH, ".//img")[0].get_attribute("src")
+    response = requests.get(img_src)
+
+    with open(screenshot_file, 'wb') as f:
+        f.write(response.content)
 
 
 queries = get_queries()

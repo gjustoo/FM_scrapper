@@ -23,7 +23,7 @@ class CarAD:
         start_index = url.index('item/') + len('item/')
 
         try:
-            end_index = url.index('/?hoi')
+            end_index = url.index('/?ref')
             self.uid = url[start_index:end_index]
         except ValueError:
             self.uid = url[start_index:]
