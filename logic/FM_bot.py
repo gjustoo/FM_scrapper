@@ -4,6 +4,7 @@ import os
 import sys
 import traceback
 from io import BytesIO
+from typing import Tuple
 
 import chromedriver_binary
 import requests
@@ -15,6 +16,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 
 import model.constants.Constants as Constants
+from db.FBMarketplaceRepo import FBMarketplaceRepo
 from model.CarAD import CarAD
 from model.FMQuery import FMQuery
 from notifier.Telegram_notifier import (send_telegram_image,
@@ -23,6 +25,10 @@ from notifier.Telegram_notifier import (send_telegram_image,
 global driver
 global telegram_notification
 global max_queries
+
+
+# TODO: get search queries from DB
+
 
 
 def get_queries() -> list[FMQuery]:
@@ -53,6 +59,7 @@ def get_properties():
     telegram_notification = config.get('BotProperties', 'bot.notification')
 
 
+# TODO: extract to a singleton class Webdriver 
 def set_up():
     global driver
     options = webdriver.ChromeOptions()
@@ -115,11 +122,12 @@ def accept_cookies():
     driver.implicitly_wait(5)
 
 
+# TODO: keep this as main method but refactor the logic
 def process_ads(query: FMQuery):
     driver.implicitly_wait(10)
     driver.get(query.get_url())
     driver.implicitly_wait(10)
-
+    mongo_repo = FBMarketplaceRepo()
     ads_containers = driver.find_elements(
         By.XPATH, Constants.xpath.ad_container_path)
     results = 0
@@ -136,13 +144,21 @@ def process_ads(query: FMQuery):
                 url = link.get_attribute("href")
 
                 split_desc = card.text.splitlines()
+                
                 card_ad = CarAD(split_desc, url)
 
-                if not check_uid(card_ad.uid):
-                    
-                    take_screenshot(query.query, card_ad.uid, card)
-                    save_uid(card_ad.uid)
-                    send_telegram_image(card_ad.to_string(), screenshot_file)
+                
+
+                if not mongo_repo.exists_car_ad(card_ad):
+                
+                    screenshot_file, img_url = take_screenshot(
+                    query.query, card_ad.uid, card)
+                    card_ad.set_images(screenshot_file, img_url)    
+                    mongo_repo.insert_car_ad(card_ad.to_dict())
+
+                    # save_uid(card_ad.uid)
+                    send_telegram_image(card_ad.to_string(), img_url)
+                    os.remove(img_url)
                     results += 1
                     if (results >= int(max_queries)):
                         break
@@ -153,19 +169,20 @@ def process_ads(query: FMQuery):
     print('Saved {} new ads'.format(results))
 
 
-def take_screenshot(query, uid, card):
+def take_screenshot(query, uid, card) -> Tuple[bytes, str]:
     directory = f'img/{query}/'
     if not os.path.exists(directory):
         os.makedirs(directory)
 
     screenshot_file = f"{directory}{uid}.png"
 
-    img_src = card.find_elements(
-        By.XPATH, ".//img")[0].get_attribute("src")
+    img_src = card.find_elements(By.XPATH, ".//img")[0].get_attribute("src")
     response = requests.get(img_src)
 
     with open(screenshot_file, 'wb') as f:
         f.write(response.content)
+
+    return response.content, screenshot_file
 
 
 queries = get_queries()

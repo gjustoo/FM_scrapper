@@ -1,8 +1,10 @@
+from datetime import datetime
 class CarAD:
 
     def __init__(self, desc, url):
         self.price = desc[0]
         self.url = url
+        self.date = datetime.now()
         self.__process_uid()
         if len(desc) == 5:
             self.title = desc[2]
@@ -27,6 +29,24 @@ class CarAD:
             self.uid = url[start_index:end_index]
         except ValueError:
             self.uid = url[start_index:]
+
+    def set_images(self, img, img_src):
+        self.img = img
+        self.img_src = img_src
+
+    def to_dict(self):
+        return {
+            'uid': self.uid,
+            'title': self.title,
+            'km': self.km,
+            'location': self.location,
+            'date': self.date,
+            'price': self.price,
+            'url': self.url,
+            'img_data': self.img,
+            'img_src': self.img_src,
+            "metadata": {"width": 800, "height": 600},
+        }
 
     def to_string(self):
         result = '⚠️⚠️⚠️⚠️⚠️⚠️\n<b>! Nuevo anuncio publicado !</b>\n ⚠️⚠️⚠️⚠️⚠️⚠️\n\n\n' + self.title + '\n 📏<b>KMs</b> ' + \
