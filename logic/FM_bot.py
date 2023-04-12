@@ -14,6 +14,7 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
+from db.SearchQueriesRepo import SearchQueryRepo
 
 import model.constants.Constants as Constants
 from db.FBMarketplaceRepo import FBMarketplaceRepo
@@ -25,10 +26,10 @@ from notifier.Telegram_notifier import (send_telegram_image,
 global driver
 global telegram_notification
 global max_queries
-
+queryRepo = SearchQueryRepo()
+queriesFromCsv = True
 
 # TODO: get search queries from DB
-
 
 
 def get_queries() -> list[FMQuery]:
@@ -59,7 +60,7 @@ def get_properties():
     telegram_notification = config.get('BotProperties', 'bot.notification')
 
 
-# TODO: extract to a singleton class Webdriver 
+# TODO: extract to a singleton class Webdriver
 def set_up():
     global driver
     options = webdriver.ChromeOptions()
@@ -144,16 +145,14 @@ def process_ads(query: FMQuery):
                 url = link.get_attribute("href")
 
                 split_desc = card.text.splitlines()
-                
+
                 card_ad = CarAD(split_desc, url)
 
-                
-
                 if not mongo_repo.exists_car_ad(card_ad):
-                
+
                     screenshot_file, img_url = take_screenshot(
-                    query.query, card_ad.uid, card)
-                    card_ad.set_images(screenshot_file, img_url)    
+                        query.query, card_ad.uid, card)
+                    card_ad.set_images(screenshot_file, img_url)
                     mongo_repo.insert_car_ad(card_ad.to_dict())
 
                     # save_uid(card_ad.uid)
@@ -185,7 +184,14 @@ def take_screenshot(query, uid, card) -> Tuple[bytes, str]:
     return response.content, screenshot_file
 
 
-queries = get_queries()
+if queriesFromCsv:
+
+    queries = get_queries()
+    queryRepo.insert_multiple(queries)
+
+else:
+    queries = queryRepo.get_all_queries()
+
 set_up()
 for query in queries:
     print(

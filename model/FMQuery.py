@@ -18,3 +18,10 @@ class FMQuery:
             result = result + '&query='+self.query
 
         return urls.mp_base.format(result)
+
+    def to_dict(self):
+        return {
+            "query": self.query,
+            "min_price": self.min_price,
+            "max_price": self.max_price
+        }
