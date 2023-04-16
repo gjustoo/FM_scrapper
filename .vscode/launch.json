@@ -10,7 +10,10 @@
             "request": "launch",
             "program": "logic/FM_bot.py",
             "console": "integratedTerminal",
-            "justMyCode": true
+            "justMyCode": true,
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            }
         }
     ]
 }
