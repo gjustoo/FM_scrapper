@@ -1,11 +1,15 @@
 from datetime import datetime
+
+
 class CarAD:
 
     def __init__(self, desc, url):
-        self.price = desc[0]
+        self.currency = ''        
+        self.price = self.__process_price(desc[0])
         self.url = url
         self.date = datetime.now()
         self.__process_uid()
+
         if len(desc) == 5:
             self.title = desc[2]
             self.location = desc[3]
@@ -17,6 +21,20 @@ class CarAD:
             self.title = desc[1]
             self.location = desc[2]
             self.km = desc[3]
+
+        # Replace dollar pounds and euro signs, whitespaces , dots and commas.
+        # Save currency symbol in a variable
+
+    def __process_price(self, price: str):
+
+        price = price.replace(' ', '')
+        self.currency = price[0]
+
+        price = price.replace('$', '')
+        price = price.replace('£', '')
+        price = price.replace('€', '')
+        price = price.replace(',', '')
+        return price
 
     def __process_uid(self):
 
