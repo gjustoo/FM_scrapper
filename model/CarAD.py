@@ -60,6 +60,7 @@ class CarAD:
             'location': self.location,
             'date': self.date,
             'price': self.price,
+            'currency': self.currency,
             'url': self.url,
             'img_data': self.img,
             'img_src': self.img_src,
@@ -69,5 +70,5 @@ class CarAD:
     def to_string(self):
         result = '⚠️⚠️⚠️⚠️⚠️⚠️\n<b>! Nuevo anuncio publicado !</b>\n ⚠️⚠️⚠️⚠️⚠️⚠️\n\n\n' + self.title + '\n 📏<b>KMs</b> ' + \
             self.km + '\n📍<b>Localizacion</b> : ' + self.location + \
-            '\n 💰<b>Precio</b> ' + self.price + '\n\n\n 🔗<b>Link</b> : ' + self.url
+            '\n 💰<b>Precio</b> ' + self.price +' '+self.currency + '\n\n\n 🔗<b>Link</b> : ' + self.url
         return result
