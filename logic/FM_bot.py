@@ -15,6 +15,8 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from db.SearchQueriesRepo import SearchQueryRepo
+from db.MongoDBConnection import MongoDBConnection
+from selenium.webdriver.chrome.service import Service
 
 import model.constants.Constants as Constants
 from db.FBMarketplaceRepo import FBMarketplaceRepo
@@ -26,6 +28,7 @@ from notifier.Telegram_notifier import (send_telegram_image,
 global driver
 global telegram_notification
 global max_queries
+db = MongoDBConnection()
 queryRepo = SearchQueryRepo()
 queriesFromCsv = True
 
@@ -69,8 +72,9 @@ def set_up():
     options.add_argument('--disable-gpu')
     options.add_argument("--disable-notifications")
 
-
-    driver = webdriver.Chrome('./chromedriver', options=options)
+    service = Service('./chromedriver')
+    service.start()
+    driver = webdriver.Chrome(service=service, options=options)
 
     driver.implicitly_wait(10)
     get_properties()
@@ -167,13 +171,14 @@ def take_screenshot(query, uid, card) -> Tuple[bytes, str]:
     return response.content, screenshot_file
 
 
-if queriesFromCsv:
+if queryRepo.is_not_empty():
 
-    queries = get_queries()
-    queryRepo.insert_multiple(queries)
+    queries = queryRepo.get_all()
+
 
 else:
-    queries = queryRepo.get_all_queries()
+    queries = get_queries()
+    queryRepo.insert_multiple(queries)
 
 set_up()
 for query in queries:
@@ -190,3 +195,5 @@ for query in queries:
         print('Could not accept cookies')
     WebDriverWait(driver, 3)
     process_ads(query)
+
+print('SCRAPING FINISHED, processed {} queries'.format(len(queries)))

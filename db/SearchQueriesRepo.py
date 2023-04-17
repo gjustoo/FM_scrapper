@@ -21,3 +21,6 @@ class SearchQueryRepo:
     
     def insert_multiple(self, search_queries: list[FMQuery]):
         self.collection.insert_many([query.to_dict() for query in search_queries])
+        
+    def is_not_empty(self):
+        return self.collection.count_documents({}) > 0
