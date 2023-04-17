@@ -1,0 +1,26 @@
+version: '3'
+services:
+  fm_scrapper:
+    build: .
+    restart: always
+    container_name: fm_scrapper_python
+    ports:
+      - "5000:5000"
+    environment:
+      MONGO_URI: mongodb://admin:admin@car_scrapper_mongodb:27017/fbMarketplaceScrapper?authSource=admin
+      PYTHONPATH: /app
+    depends_on:
+      - mongodb
+    command: sh -c "sleep 30 && python /app/logic/FM_bot.py && cron && tail -f /var/log/cron.log"
+
+  mongodb:
+    image: mongo
+    restart: always
+    container_name: car_scrapper_mongodb
+    ports:
+      - "27019:27017"
+    volumes:
+      - ./data:/data/db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=admin

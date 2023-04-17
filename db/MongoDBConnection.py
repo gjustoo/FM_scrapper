@@ -28,7 +28,12 @@ class MongoDBConnection:
             self.host = os.environ.get('MONGO_HOST')
             self.port = os.environ.get('MONGO_PORT')
             self.auth_src = os.environ.get('MONGO_AUTH_SOURCE')
-            self.CONNECTION_STRING = f"mongodb://{self.username}:{passwd}@{self.host}:{self.port}/fbMarketplaceScrapper?authSource={self.auth_src}"
+            os_env_uri = os.environ.get('MONGO_URI')
+            if os_env_uri:
+                self.CONNECTION_STRING = os_env_uri
+            else:
+                self.CONNECTION_STRING = f"mongodb://admin:admin@localhost:27019/fbMarketplaceScrapper?authSource=admin"
+                
 
             self.client = MongoClient(self.CONNECTION_STRING)
             self.db = self.client[self.db_name]
