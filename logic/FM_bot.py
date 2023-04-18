@@ -70,6 +70,7 @@ def set_up():
     options.add_argument('--headless')
     options.add_argument("--no-sandbox")
     options.add_argument('--disable-gpu')
+    options.add_argument('--incognito')
     options.add_argument("--disable-notifications")
 
     service = Service('./chromedriver')
@@ -122,6 +123,7 @@ def process_ads(query: FMQuery):
     for ads in ads_containers:
         cards = ads.find_elements(
             By.XPATH, Constants.xpath.cards_xpath)
+        print('Total ADS found for ' + str(query.query) + ' : ' + str(len(cards)))
         for card in cards:
             try:
                 if card.text == '':
@@ -148,7 +150,8 @@ def process_ads(query: FMQuery):
                     results += 1
                     if (results >= int(max_queries)):
                         break
-
+                else:
+                    print('AD ALREADY EXISTS : \n' + card.text)
             except:
                 traceback.print_exc()
 
@@ -172,16 +175,19 @@ def take_screenshot(query, uid, card) -> Tuple[bytes, str]:
 
 
 if queryRepo.is_not_empty():
-
     queries = queryRepo.get_all()
-
-
 else:
     queries = get_queries()
     queryRepo.insert_multiple(queries)
 
-set_up()
-for query in queries:
+
+query_list = list(queries)
+for query in query_list:
+    set_up()
+    driver.delete_all_cookies()
+    query_dict = dict(query)
+    del query_dict['_id']
+    query = FMQuery(**query_dict)
     print(
         f'\tSearch car model : {query.query} at maximum price of {query.max_price}.')
     try:
@@ -195,5 +201,7 @@ for query in queries:
         print('Could not accept cookies')
     WebDriverWait(driver, 3)
     process_ads(query)
+    driver.quit()
 
-print('SCRAPING FINISHED, processed {} queries'.format(len(queries)))
+
+print('SCRAPING FINISHED, processed {} queries'.format(len(query_list)))
